@@ -145,7 +145,8 @@ async fn test_customers() {
     assert_eq!(customer.billing_address, None);
     assert_eq!(customer.shipping_address, None);
     assert_eq!(customer.tax_id, None);
-    assert_eq!(customer.additional_emails, vec![]);
+    let empty_emails: Vec<String> = vec![];
+    assert_eq!(customer.additional_emails, empty_emails);
 
     // Test fetching the customer by ID.
     let customer = client.get_customer(&customer.id).await.unwrap();
@@ -243,7 +244,8 @@ async fn test_customers() {
     assert_eq!(customer.email, "orb-testing+update-1@materialize.com");
     let customer = client.get_customer(&customer.id).await.unwrap();
     assert_eq!(customer.email, "orb-testing+update-1@materialize.com");
-    assert_eq!(customer.additional_emails, vec![]);
+    let empty_emails: Vec<String> = vec![];
+    assert_eq!(customer.additional_emails, empty_emails);
 
     // Test updating additional_emails by ID
     let customer = client
