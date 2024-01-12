@@ -145,6 +145,7 @@ async fn test_customers() {
     assert_eq!(customer.billing_address, None);
     assert_eq!(customer.shipping_address, None);
     assert_eq!(customer.tax_id, None);
+    assert_eq!(customer.additional_emails, vec![]);
 
     // Test fetching the customer by ID.
     let customer = client.get_customer(&customer.id).await.unwrap();
@@ -241,6 +242,36 @@ async fn test_customers() {
         .unwrap();
     assert_eq!(customer.email, "orb-testing+update-1@materialize.com");
     let customer = client.get_customer(&customer.id).await.unwrap();
+    assert_eq!(customer.email, "orb-testing+update-1@materialize.com");
+    assert_eq!(customer.additional_emails, vec![]);
+
+    // Test updating additional_emails by ID
+    let customer = client
+        .update_customer(
+            &customer.id,
+            &UpdateCustomerRequest {
+                additional_emails: Some(vec![
+                    "orb-testing+update-2@materialize.com",
+                    "orb-testing-update-3@materialize.com",
+                ]),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+    assert!(customer
+        .additional_emails
+        .contains(&"orb-testing+update-2@materialize.com".to_string()));
+    assert!(customer
+        .additional_emails
+        .contains(&"orb-testing+update-3@materialize.com".to_string()));
+    let customer = client.get_customer(&customer.id).await.unwrap();
+    assert!(customer
+        .additional_emails
+        .contains(&"orb-testing+update-2@materialize.com".to_string()));
+    assert!(customer
+        .additional_emails
+        .contains(&"orb-testing+update-3@materialize.com".to_string()));
     assert_eq!(customer.email, "orb-testing+update-1@materialize.com");
 
     // Test updating the customer by external ID.
