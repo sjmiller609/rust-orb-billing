@@ -41,14 +41,7 @@ use tokio::time::{self, Duration};
 use tracing::info;
 
 use orb_billing::{
-    AddIncrementCreditLedgerEntryRequestParams, AddVoidCreditLedgerEntryRequestParams, Address,
-    AddressRequest, AmendEventRequest, CancelOption, CancelSubscriptionParams, Client,
-    ClientConfig, CostViewMode, CreateCustomerRequest, CreateSubscriptionRequest, Customer,
-    CustomerCostParams, CustomerCostPriceBlockPrice, CustomerId, CustomerPaymentProviderRequest,
-    Error, Event, EventPropertyValue, EventSearchParams, IngestEventRequest, IngestionMode,
-    InvoiceListParams, LedgerEntry, LedgerEntryRequest, ListParams, PaymentProvider,
-    SubscriptionListParams, SubscriptionStatus, TaxId, TaxIdRequest, UpdateCustomerRequest,
-    VoidReason,
+    AddAdjustmentIntervalParams, AddEditPriceIntervalParams, AddIncrementCreditLedgerEntryRequestParams, AddVoidCreditLedgerEntryRequestParams, Address, AddressRequest, AmendEventRequest, CancelOption, CancelSubscriptionParams, Client, ClientConfig, CostViewMode, CreateCustomerRequest, CreateSubscriptionRequest, Customer, CustomerCostParams, CustomerCostPriceBlockPrice, CustomerId, CustomerPaymentProviderRequest, Error, Event, EventPropertyValue, EventSearchParams, IngestEventRequest, IngestionMode, InvoiceListParams, LedgerEntry, LedgerEntryRequest, ListParams, NewAdjustment, PaymentProvider, SubscriptionListParams, SubscriptionStatus, TaxId, TaxIdRequest, UpdateCustomerRequest, VoidReason
 };
 
 /// The API key to authenticate with.
@@ -723,6 +716,58 @@ async fn test_subscriptions() {
         )
         .await;
     assert_error_with_status_code(result, StatusCode::BAD_REQUEST);
+}
+
+#[test(tokio::test)]
+async fn test_price_intervals() {
+    let client = new_client();
+    delete_all_test_customers(&client).await;
+
+    // Create a customer
+    let customer = create_test_customer(&client, 0).await;
+
+    // Create a subscription
+    let subscription = client
+        .create_subscription(&CreateSubscriptionRequest {
+            customer_id: CustomerId::Orb(&customer.id),
+            plan_id: orb_billing::PlanId::External("test"),
+            ..Default::default()
+        })
+        .await
+        .unwrap();
+
+    let plan = client.get_plan(&subscription.plan.id).await.unwrap();
+    let price_ids = plan.pricing_model.prices.iter().map(|p| p.id.clone()).collect::<Vec<String>>();
+
+    // Apply a 100% discount to the subscription
+    let discount_params = AddEditPriceIntervalParams {
+        add_adjustments: vec![AddAdjustmentIntervalParams {
+            adjustment: NewAdjustment::PercentageDiscount {
+                applies_to_price_ids: vec!["*"],
+                percentage_discount: 100.0,
+            },
+            start_date: None,
+            end_date: None,
+        }],
+        ..Default::default()
+    };
+
+    let _updated_subscription = client
+        .add_edit_price_intervals(&subscription.id, &discount_params)
+        .await
+        .unwrap();
+
+    // Cancel the subscription
+    let cancel_params = CancelSubscriptionParams {
+        cancel_option: CancelOption::Immediate,
+        cancellation_date: None,
+    };
+
+    let _cancelled_subscription = client
+        .cancel_subscription(&subscription.id, &cancel_params)
+        .await
+        .unwrap();
+
 }
 
 #[test(tokio::test)]
