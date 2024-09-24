@@ -41,7 +41,15 @@ use tokio::time::{self, Duration};
 use tracing::info;
 
 use orb_billing::{
-    AddAdjustmentIntervalParams, AddEditPriceIntervalParams, AddIncrementCreditLedgerEntryRequestParams, AddVoidCreditLedgerEntryRequestParams, Address, AddressRequest, AmendEventRequest, CancelOption, CancelSubscriptionParams, Client, ClientConfig, CostViewMode, CreateCustomerRequest, CreateSubscriptionRequest, Customer, CustomerCostParams, CustomerCostPriceBlockPrice, CustomerId, CustomerPaymentProviderRequest, Error, Event, EventPropertyValue, EventSearchParams, IngestEventRequest, IngestionMode, InvoiceListParams, LedgerEntry, LedgerEntryRequest, ListParams, NewAdjustment, PaymentProvider, SubscriptionListParams, SubscriptionStatus, TaxId, TaxIdRequest, UpdateCustomerRequest, VoidReason
+    AddAdjustmentIntervalParams, AddEditPriceIntervalParams,
+    AddIncrementCreditLedgerEntryRequestParams, AddVoidCreditLedgerEntryRequestParams, Address,
+    AddressRequest, AmendEventRequest, CancelOption, CancelSubscriptionParams, Client,
+    ClientConfig, CostViewMode, CreateCustomerRequest, CreateSubscriptionRequest, Customer,
+    CustomerCostParams, CustomerCostPriceBlockPrice, CustomerId, CustomerPaymentProviderRequest,
+    Error, Event, EventPropertyValue, EventSearchParams, IngestEventRequest, IngestionMode,
+    InvoiceListParams, LedgerEntry, LedgerEntryRequest, ListParams, NewAdjustment, PaymentProvider,
+    SubscriptionListParams, SubscriptionStatus, TaxId, TaxIdRequest, UpdateCustomerRequest,
+    VoidReason,
 };
 
 /// The API key to authenticate with.
@@ -736,9 +744,6 @@ async fn test_price_intervals() {
         .await
         .unwrap();
 
-    let plan = client.get_plan(&subscription.plan.id).await.unwrap();
-    let price_ids = plan.pricing_model.prices.iter().map(|p| p.id.clone()).collect::<Vec<String>>();
-
     // Apply a 100% discount to the subscription
     let discount_params = AddEditPriceIntervalParams {
         add_adjustments: vec![AddAdjustmentIntervalParams {
@@ -767,7 +772,6 @@ async fn test_price_intervals() {
         .cancel_subscription(&subscription.id, &cancel_params)
         .await
         .unwrap();
-
 }
 
 #[test(tokio::test)]

@@ -62,14 +62,15 @@ pub use client::invoices::{
 };
 pub use client::marketplaces::ExternalMarketplace;
 pub use client::plans::{Plan, PlanId};
+pub use client::price_intervals::{
+    AddAdjustmentIntervalParams, AddEditPriceIntervalParams, NewAdjustment,
+};
+pub use client::prices::Price;
 pub use client::subscriptions::{
     CancelOption, CancelSubscriptionParams, CreateSubscriptionRequest, Subscription,
     SubscriptionListParams, SubscriptionStatus,
 };
-pub use client::price_intervals::{AddAdjustmentIntervalParams, AddEditPriceIntervalParams, NewAdjustment};
-pub use client::prices::Price;
 pub use client::taxes::{TaxId, TaxIdRequest, TaxIdType};
 pub use client::Client;
 pub use config::{ClientBuilder, ClientConfig, ListParams};
 pub use error::{ApiError, Error};
-
