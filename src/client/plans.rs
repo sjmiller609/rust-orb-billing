@@ -24,6 +24,7 @@ use crate::client::Client;
 use crate::config::ListParams;
 use crate::error::Error;
 use crate::util::StrIteratorExt;
+use crate::Price;
 
 const PLANS_PATH: [&str; 1] = ["plans"];
 
@@ -66,6 +67,8 @@ pub struct Plan {
     /// Arbitrary metadata that is attached to the plan. Cannot be nested, must have string values.
     #[serde(default)]
     pub metadata: BTreeMap<String, String>,
+    /// The prices associated with this plan.
+    pub prices: Vec<Price>,
     // TODO: many missing fields.
 }
 
